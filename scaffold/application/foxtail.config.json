@@ -1,0 +1,20 @@
+{
+    "alias": {
+        "lib": {
+            "scope": "@lib",
+            "dir": "lib"
+        },
+        "imgs": {
+            "scope": "@imgs",
+            "dir": "imgs"
+        },
+        "data": {
+            "scope": "@data",
+            "dir": "data"
+        },
+        "comps": {
+            "scope": "@comps",
+            "dir": "comps"
+        }
+    }
+}

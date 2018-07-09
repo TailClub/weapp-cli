@@ -10,12 +10,12 @@ const child_process = require('child_process')
 
 // 拷贝 脚手架模板
 function copyScaffold(options) {
-    const { src: proSrc, dest: prodest, scaffold } = config
+    const { cwd: proCwd, src: proSrc, dest: prodest, scaffold } = config
     // 创建内存编辑器
     const store = mem.create()
     const fsEditor = editor.create(store)
     // 拷贝 mimi application 脚手架
-    fsEditor.copyTpl(scaffold.application, proSrc, options, null, {
+    fsEditor.copyTpl(scaffold.application, proCwd, options, null, {
         globOptions: {
             dot: true
         }
@@ -34,18 +34,12 @@ function copyScaffold(options) {
                 log.msg(LogType.COPY, file)
             })
 
-            child_process.spawnSync('cp', ['-r', proSrc, prodest])
-            // 删除dest目录无用的文件
-            child_process.spawnSync('rm', [
-                '-rf',
-                `./dest/${config.CONFIG_FILE_NAME}`,
-                './dest/README.md',
-                './dest/.gitignore'
-            ])
-
             log.msg(LogType.CREATE, `生成dest目录成功`)
 
             log.msg(LogType.COMPLETE, `项目已创建完成`)
+
+            log.msg(LogType.TIP, `如需开发模式，请使用 foxmin dev 命令。`)
+
             resolve()
         })
     })

@@ -11,7 +11,7 @@ let configData = {}
 
 // 获取用户配置
 function getUserConfig() {
-    const src = path.join(config.src, config.CONFIG_FILE_NAME)
+    const src = path.join(config.cwd, config.CONFIG_FILE_NAME)
     if (fs.existsSync(src)) {
         const { alias = {} } = JSON.parse(fs.readFileSync(src, 'utf8'))
         const aliasKeys = Object.keys(alias)
@@ -31,7 +31,7 @@ function getUserConfig() {
 function buildFiles() {
     child_process.spawnSync('cp', ['-r', config.src, config.dest])
     // 删除dest目录无用的文件
-    child_process.spawnSync('rm', ['-rf', `./dest/${config.CONFIG_FILE_NAME}`, './dest/README.md', './dest/.gitignore'])
+    // child_process.spawnSync('rm', ['-rf', `./dest/${config.CONFIG_FILE_NAME}`, './dest/README.md', './dest/.gitignore'])
     log.msg(LogType.CREATE, `生成dest目录成功`)
 
     const files = glob.sync('**/*.{js,json}', {
@@ -57,7 +57,7 @@ function buildFiles() {
 function watchFile() {
     let watcher = chokidar.watch([config.src], {
         cwd: config.cwd,
-        ignored: /node_modules|\.git|\.txt|\.log|\.DS_Store|\.npmignore|package\.json|typings|\.gitignore|\.md|foxtail\.config\.json/i,
+        ignored: /node_modules|\.git|\.txt|\.log|\.DS_Store/i,
         persistent: true,
         ignoreInitial: true
     })

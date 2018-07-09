@@ -1,4 +1,3 @@
-const { prompt, Question } = require('inquirer')
 const fs = require('fs')
 const mem = require('mem-fs')
 const editor = require('mem-fs-editor')

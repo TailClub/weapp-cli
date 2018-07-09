@@ -1,11 +1,11 @@
+const child_process = require('child_process')
 const { LogType } = require('../lib/status')
 const chokidar = require('chokidar')
 const config = require('../config')
-// const cache = require('../lib/cache')
 const log = require('../lib/log')
+const glob = require('glob')
 const path = require('path')
 const fs = require('fs')
-const os = require('os')
 
 let configData = {}
 
@@ -25,6 +25,32 @@ function getUserConfig() {
             })
         }
     }
+}
+
+// 编译全文件
+function buildFiles() {
+    child_process.spawnSync('cp', ['-r', config.src, config.dest])
+    // 删除dest目录无用的文件
+    child_process.spawnSync('rm', ['-rf', `./dest/${config.CONFIG_FILE_NAME}`, './dest/README.md', './dest/.gitignore'])
+    log.msg(LogType.CREATE, `生成dest目录成功`)
+
+    const files = glob.sync('**/*.{js,json}', {
+        cwd: config.src,
+        ignore: '{{project,foxtail}.config,jsconfig}.json'
+    })
+    files.forEach(file => {
+        const src = path.join(config.src, file)
+        const dest = path.join(config.dest, file)
+
+        let fileData = fs.readFileSync(src, 'utf8')
+        configData.alias.forEach(v => {
+            const relative = path.relative(src, v.dir)
+            const regexp = new RegExp(`${v.scope}`, 'g')
+            fileData = fileData.replace(regexp, relative)
+        })
+        fs.writeFileSync(dest, fileData)
+        log.msg(LogType.BUILD, file)
+    })
 }
 
 // 监测文件入口
@@ -49,6 +75,9 @@ function watchFile() {
             if (!this.isWatched) {
                 this.isWatched = true
                 log.msg(LogType.WATCH, '开始监听文件改动。')
+                if (!fs.existsSync(config.dest)) {
+                    buildFiles()
+                }
             }
         })
 
@@ -122,9 +151,12 @@ function watchChangeFile(file) {
 }
 
 function run() {
-    if (fs.existsSync(config.src) || fs.existsSync(config.dest)) {
-        watchFile()
+    if (fs.existsSync(config.src)) {
         getUserConfig()
+        if (!fs.existsSync(config.dest)) {
+            buildFiles()
+        }
+        watchFile()
     } else {
         log.msg(LogType.WARN, '该目录下暂无初始化项目，请使用foxtail init初始化项目。')
     }

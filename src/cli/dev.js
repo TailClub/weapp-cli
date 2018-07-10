@@ -29,6 +29,7 @@ function getUserConfig() {
 
 // 编译全文件
 function buildFiles() {
+    child_process.spawnSync('rm', ['-rf', config.dest])
     child_process.spawnSync('cp', ['-r', config.src, config.dest])
     // 删除dest目录无用的文件
     // child_process.spawnSync('rm', ['-rf', `./dest/${config.CONFIG_FILE_NAME}`, './dest/README.md', './dest/.gitignore'])
@@ -153,9 +154,7 @@ function watchChangeFile(file) {
 function run() {
     if (fs.existsSync(config.src)) {
         getUserConfig()
-        if (!fs.existsSync(config.dest)) {
-            buildFiles()
-        }
+        buildFiles()
         watchFile()
     } else {
         log.msg(LogType.WARN, '该目录下暂无初始化项目，请使用foxtail init初始化项目。')

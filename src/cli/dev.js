@@ -58,7 +58,7 @@ function buildFiles() {
 function watchFile() {
     let watcher = chokidar.watch([config.src], {
         cwd: config.cwd,
-        ignored: /node_modules|\.\w+/i,
+        ignored: /node_modules|\.DS_Store/i,
         persistent: true,
         ignoreInitial: true
     })

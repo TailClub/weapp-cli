@@ -5,9 +5,41 @@ const config = require('../config')
 const log = require('../lib/log')
 const glob = require('glob')
 const path = require('path')
+const less = require('less')
 const fs = require('fs')
 
 let configData = {}
+
+// 编译less
+function compileLess(srcPath, destPath) {
+    const content = fs.readFileSync(srcPath, 'utf8')
+    less.render(content, {
+        rootFileInfo: {
+            currentDirectory: path.dirname(srcPath)
+        }
+    })
+        .then(res => {
+            if (res.css.length) {
+                fs.writeFileSync(destPath, res.css)
+            } else {
+                child_process.spawnSync('rm', ['-rf', destPath])
+            }
+        })
+        .catch(e => {
+            log.msg(LogType.ERROR, srcPath)
+        })
+}
+
+// 编译js
+function compileJavascript(srcPath, destPath) {
+    let fileData = fs.readFileSync(srcPath, 'utf8')
+    configData.alias.forEach(v => {
+        const relative = path.relative(srcPath, v.dir)
+        const regexp = new RegExp(`${v.scope}`, 'g')
+        fileData = fileData.replace(regexp, relative)
+    })
+    fs.writeFileSync(destPath, fileData)
+}
 
 // 获取用户配置
 function getUserConfig() {
@@ -35,21 +67,18 @@ function buildFiles() {
     // child_process.spawnSync('rm', ['-rf', `./dest/${config.CONFIG_FILE_NAME}`, './dest/README.md', './dest/.gitignore'])
     log.msg(LogType.CREATE, `生成dest目录成功`)
 
-    const files = glob.sync('**/*.{js,json}', {
+    const files = glob.sync('**/*.{js,json,less}', {
         cwd: config.src,
         ignore: '{{project,foxtail}.config,jsconfig}.json'
     })
     files.forEach(file => {
         const src = path.join(config.src, file)
         const dest = path.join(config.dest, file)
-
-        let fileData = fs.readFileSync(src, 'utf8')
-        configData.alias.forEach(v => {
-            const relative = path.relative(src, v.dir)
-            const regexp = new RegExp(`${v.scope}`, 'g')
-            fileData = fileData.replace(regexp, relative)
-        })
-        fs.writeFileSync(dest, fileData)
+        if (path.extname(src) === '.less') {
+            compileLess(src, dest)
+        } else {
+            compileJavascript(src, dest)
+        }
         log.msg(LogType.BUILD, file)
     })
 }
@@ -64,8 +93,8 @@ function watchFile() {
     })
 
     watcher
-        .on('add', watchAddFile)
         .on('addDir', watchAddDir)
+        .on('add', watchAddFile)
         .on('change', watchChangeFile)
         .on('unlink', watchDeleteFile)
         .on('unlinkDir', watchDeleteDir)
@@ -90,8 +119,12 @@ function watchAddFile(file) {
     file = file.slice(4)
     const src = path.join(config.src, file)
     const dest = path.join(config.dest, file)
+    const destDir = path.dirname(dest)
+    if (!fs.existsSync(destDir)) {
+        log.msg(LogType.CREATE, destDir.slice(destDir.lastIndexOf('/')))
+        fs.mkdirSync(destDir)
+    }
     if (!fs.existsSync(dest)) {
-        log.newline()
         log.msg(LogType.CREATE, file)
         fs.copyFileSync(src, dest)
     }
@@ -102,7 +135,6 @@ function watchAddDir(dir) {
     dir = dir.slice(4)
     const dest = path.join(config.dest, dir)
     if (!fs.existsSync(dest)) {
-        log.newline()
         log.msg(LogType.CREATE, dir)
         fs.mkdirSync(dest)
     }
@@ -113,7 +145,6 @@ function watchDeleteFile(file) {
     file = file.slice(4)
     const dest = path.join(config.dest, file)
     if (fs.existsSync(dest)) {
-        log.newline()
         log.msg(LogType.DELETE, file)
         fs.unlinkSync(dest)
     }
@@ -124,7 +155,6 @@ function watchDeleteDir(dir) {
     dir = dir.slice(4)
     const dest = path.join(config.dest, dir)
     if (fs.existsSync(dest)) {
-        log.newline()
         log.msg(LogType.DELETE, dir)
         fs.rmdirSync(dest)
     }
@@ -136,16 +166,11 @@ function watchChangeFile(file) {
     const src = path.join(config.src, file)
     const dest = path.join(config.dest, file)
     const extname = path.extname(src)
-    log.newline()
     log.msg(LogType.CHANGE, file)
     if (~['.js', '.json'].indexOf(extname) && configData.alias) {
-        let fileData = fs.readFileSync(src, 'utf8')
-        configData.alias.forEach(v => {
-            const relative = path.relative(src, v.dir)
-            const regexp = new RegExp(`${v.scope}`, 'g')
-            fileData = fileData.replace(regexp, relative)
-        })
-        fs.writeFileSync(dest, fileData)
+        compileJavascript(src, dest)
+    } else if (extname === '.less') {
+        compileLess(src, dest)
     } else {
         fs.copyFileSync(src, dest)
     }

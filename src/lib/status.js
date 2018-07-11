@@ -22,14 +22,14 @@ const LogType = {
         level: LogLevel.ERROR
     },
     WARN: {
-        color: 'yellow',
+        color: 'bgYellow',
         desc: 'WARN',
         level: LogLevel.WARN
     },
     CHANGE: {
-        color: 'bgYellow',
+        color: 'yellow',
         desc: '变更',
-        level: LogLevel.WARN
+        level: LogLevel.TIP
     },
     DELETE: {
         color: 'bgMagenta',

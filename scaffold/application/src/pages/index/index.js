@@ -1,19 +1,19 @@
 Page({
     data: {},
 
-    onLoad: function(options) {},
+    onLoad(options) {},
 
-    onReady: function() {},
+    onReady() {},
 
-    onShow: function() {},
+    onShow() {},
 
-    onHide: function() {},
+    onHide() {},
 
-    onUnload: function() {},
+    onUnload() {},
 
-    onPullDownRefresh: function() {},
+    onPullDownRefresh() {},
 
-    onReachBottom: function() {},
+    onReachBottom() {},
 
-    onShareAppMessage: function() {}
+    onShareAppMessage() {}
 })

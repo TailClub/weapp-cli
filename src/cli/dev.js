@@ -20,7 +20,7 @@ function compileLess(srcPath, destPath) {
     })
         .then(res => {
             if (res.css.length) {
-                fs.writeFileSync(destPath, res.css)
+                fs.writeFileSync(destPath.replace('.less', '.wxss'), res.css)
             } else {
                 child_process.spawnSync('rm', ['-rf', destPath])
             }

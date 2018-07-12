@@ -19,10 +19,9 @@ function compileLess(srcPath, destPath) {
         }
     })
         .then(res => {
+            destPath = destPath.replace('.less', '.wxss')
             if (res.css.length) {
-                fs.writeFileSync(destPath.replace('.less', '.wxss'), res.css)
-            } else {
-                child_process.spawnSync('rm', ['-rf', destPath])
+                fs.writeFileSync(destPath, res.css)
             }
         })
         .catch(e => {
@@ -75,11 +74,23 @@ function buildFiles() {
         const src = path.join(config.src, file)
         const dest = path.join(config.dest, file)
         if (path.extname(src) === '.less') {
-            compileLess(src, dest)
+            compileLess(src, dest, true)
         } else {
             compileJavascript(src, dest)
         }
         log.msg(LogType.BUILD, file)
+    })
+
+    cleanFiles()
+}
+
+function cleanFiles() {
+    const files = glob.sync('**/*.less', {
+        cwd: config.dest,
+        ignore: '{{project,foxtail}.config,jsconfig}.json'
+    })
+    files.forEach(file => {
+        fs.unlink(file, e => {})
     })
 }
 

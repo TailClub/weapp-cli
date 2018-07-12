@@ -1,6 +1,6 @@
 {
     "name": "@foxtail/weapp-cli",
-    "version": "1.3.2",
+    "version": "1.3.3",
     "description": "解决微信小程序组件路径麻烦问题",
     "bin": {
         "foxmin": "./bin/foxmin.js"

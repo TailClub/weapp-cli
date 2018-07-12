@@ -90,7 +90,7 @@ function cleanFiles() {
         ignore: '{{project,foxtail}.config,jsconfig}.json'
     })
     files.forEach(file => {
-        fs.unlink(file, e => {})
+        fs.unlink(path.join(config.dest, file), e => {})
     })
 }
 
@@ -129,7 +129,7 @@ function watchFile() {
 function watchAddFile(file) {
     file = file.slice(4)
     const src = path.join(config.src, file)
-    const dest = path.join(config.dest, file)
+    const dest = path.join(config.dest, file).replace('.less', '.wxss')
     const destDir = path.dirname(dest)
     if (!fs.existsSync(destDir)) {
         log.msg(LogType.CREATE, destDir.slice(destDir.lastIndexOf('/')))
@@ -153,8 +153,9 @@ function watchAddDir(dir) {
 
 // 监测删除文件
 function watchDeleteFile(file) {
-    file = file.slice(4)
+    file = file.slice(4).replace('.less', '.wxss')
     const dest = path.join(config.dest, file)
+
     if (fs.existsSync(dest)) {
         log.msg(LogType.DELETE, file)
         fs.unlinkSync(dest)

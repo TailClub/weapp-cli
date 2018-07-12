@@ -38,7 +38,7 @@ function compileJavascript(srcPath, destPath) {
         const relative = path.relative(srcPath, v.dir)
         const relativePath = isWin32 ? relative.replace(/\\/g, '/') : relative
         const regexp = new RegExp(`${v.scope}`, 'g')
-        fileData = fileData.replace(regexp, relative)
+        fileData = fileData.replace(regexp, relativePath)
     })
     fs.writeFileSync(destPath, fileData)
 }

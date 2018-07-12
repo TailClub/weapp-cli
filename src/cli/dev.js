@@ -60,7 +60,7 @@ function getUserConfig() {
 
 // 编译全文件
 function buildFiles() {
-    child_process.spawnSync('rm', ['-rf', config.dest])
+    child_process.spawnSync('rm', ['-r', config.dest])
     child_process.spawnSync('cp', ['-r', config.src, config.dest])
     // 删除dest目录无用的文件
     // child_process.spawnSync('rm', ['-rf', `./dest/${config.CONFIG_FILE_NAME}`, './dest/README.md', './dest/.gitignore'])

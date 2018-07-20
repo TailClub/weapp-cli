@@ -16,10 +16,10 @@ const isWin32 = process.platform === 'win32'
 function compileLess(srcPath, destPath) {
     const content = fs.readFileSync(srcPath, 'utf8')
     less.render(content, {
-            rootFileInfo: {
-                currentDirectory: path.dirname(srcPath)
-            }
-        })
+        rootFileInfo: {
+            currentDirectory: path.dirname(srcPath)
+        }
+    })
         .then(res => {
             destPath = destPath.replace('.less', '.wxss')
             if (res.css.length) {
@@ -34,8 +34,12 @@ function compileLess(srcPath, destPath) {
 // 编译js
 function compileJavascript(srcPath, destPath) {
     let fileData = fs.readFileSync(srcPath, 'utf8')
+    const extname = path.extname(srcPath)
+    if (extname === '.js' && configData.useAsync.active) {
+        fileData = `import regeneratorRuntime from '${configData.useAsync.path}'\n` + fileData
+    }
     configData.alias.forEach(v => {
-        const relative = path.relative(path.dirname(srcPath),  v.dir)
+        const relative = path.relative(path.dirname(srcPath), v.dir)
         const relativePath = isWin32 ? relative.replace(/\\/g, '/') : relative
         const regexp = new RegExp(`${v.scope}`, 'g')
         fileData = fileData.replace(regexp, relativePath)
@@ -48,7 +52,7 @@ function compileJavascript(srcPath, destPath) {
 function getUserConfig() {
     const src = path.join(config.cwd, config.CONFIG_FILE_NAME)
     if (fs.existsSync(src)) {
-        const { alias = {} } = JSON.parse(fs.readFileSync(src, 'utf8'))
+        const { alias = {}, useAsync = {} } = JSON.parse(fs.readFileSync(src, 'utf8'))
         const aliasKeys = Object.keys(alias)
         if (aliasKeys.length) {
             configData.alias = []
@@ -59,6 +63,7 @@ function getUserConfig() {
                 })
             })
         }
+        configData.useAsync = useAsync
     }
 }
 

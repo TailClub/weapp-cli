@@ -36,7 +36,9 @@ function compileJavascript(srcPath, destPath) {
     let fileData = fs.readFileSync(srcPath, 'utf8')
     const extname = path.extname(srcPath)
     if (extname === '.js' && configData.useAsync.active) {
-        fileData = `import regeneratorRuntime from '${configData.useAsync.path}'\n` + fileData
+        if (/\basync\b/.test(fileData)) {
+            fileData = `import regeneratorRuntime from '${configData.useAsync.path}'\n` + fileData
+        }
     }
     configData.alias.forEach(v => {
         const relative = path.relative(path.dirname(srcPath), v.dir)

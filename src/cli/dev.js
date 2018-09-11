@@ -6,7 +6,8 @@ const log = require('../lib/log')
 const glob = require('glob')
 const path = require('path')
 const less = require('less')
-const fs = require('fs')
+// const fs = require('fs')
+const fs = require('fs-extra')
 
 let configData = {}
 
@@ -71,17 +72,34 @@ function getUserConfig() {
 
 // 编译全文件
 function buildFiles() {
-    child_process.spawnSync('rm', ['-r', config.dest])
-    child_process.spawnSync('cp', ['-r', config.src, config.dest])
+    // child_process.spawnSync('rm', ['-r', config.dest])
+    // child_process.spawnSync('cp', ['-r', config.src, config.dest])
+    let copyFiles = null
+    if (!fs.existsSync(config.dest)) {
+        fs.mkdirpSync(config.dest)
+        copyFiles = glob.sync('*', { cwd: config.src })
+    } else {
+        copyFiles = glob.sync('!(project.config.json)', { cwd: config.src })
+        copyFiles.forEach(file => {
+            const dest = path.join(config.dest, file)
+            fs.removeSync(dest)
+        })
+    }
+    copyFiles.forEach(file => {
+        const src = path.join(config.src, file)
+        const dest = path.join(config.dest, file)
+        fs.copySync(src, dest)
+    })
+
     // 删除dest目录无用的文件
     // child_process.spawnSync('rm', ['-rf', `./dest/${config.CONFIG_FILE_NAME}`, './dest/README.md', './dest/.gitignore'])
     log.msg(LogType.CREATE, `生成dest目录成功`)
 
-    const files = glob.sync('**/*.{js,json,less}', {
+    const compilefiles = glob.sync('**/*.{js,json,less}', {
         cwd: config.src,
         ignore: '{{project,foxtail}.config,jsconfig}.json'
     })
-    files.forEach(file => {
+    compilefiles.forEach(file => {
         const src = path.join(config.src, file)
         const dest = path.join(config.dest, file)
         if (path.extname(src) === '.less') {

@@ -173,10 +173,17 @@ function watchAddFile(file) {
 // 监测添加目录
 function watchAddDir(dir) {
     dir = dir.slice(4)
+    const src = path.join(config.src, dir)
     const dest = path.join(config.dest, dir)
     if (!fs.existsSync(dest)) {
         log.msg(LogType.CREATE, dir)
         fs.mkdirSync(dest)
+        if (dest.indexOf('pages') > -1) {
+            fs.writeFile(path.join(src, 'index.js'), 'Page({})')
+            fs.writeFile(path.join(src, 'index.json'), '{}')
+            fs.createFile(path.join(src, 'index.less'))
+            fs.createFile(path.join(src, 'index.wxml'))
+        }
     }
 }
 
@@ -187,7 +194,7 @@ function watchDeleteFile(file) {
 
     if (fs.existsSync(dest)) {
         log.msg(LogType.DELETE, file)
-        fs.unlinkSync(dest)
+        fs.remove(dest)
     }
 }
 
@@ -197,7 +204,7 @@ function watchDeleteDir(dir) {
     const dest = path.join(config.dest, dir)
     if (fs.existsSync(dest)) {
         log.msg(LogType.DELETE, dir)
-        fs.rmdirSync(dest)
+        fs.remove(dest)
     }
 }
 

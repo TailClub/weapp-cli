@@ -81,7 +81,9 @@ function buildFiles() {
         copyFiles = glob.sync('!(project.config.json)', { cwd: config.src })
         copyFiles.forEach(file => {
             const dest = path.join(config.dest, file)
-            fs.removeSync(dest)
+            try {
+                fs.removeSync(dest)
+            } catch (e) {}
         })
     }
     copyFiles.forEach(file => {

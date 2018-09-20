@@ -117,8 +117,12 @@ function cleanFiles() {
         cwd: config.dest,
         ignore: '{{project,foxtail}.config,jsconfig}.json'
     })
-    files.forEach(file => {
-        fs.unlink(path.join(config.dest, file), e => {})
+    Promise.all(
+        files.map(file => {
+            fs.remove(path.join(config.dest, file), e => {})
+        })
+    ).then(() => {
+        watchFile()
     })
 }
 
@@ -140,15 +144,16 @@ function watchFile() {
         .on('error', err => {
             log.fatal(err)
         })
-        .on('ready', () => {
-            if (!this.isWatched) {
-                this.isWatched = true
-                log.msg(LogType.WATCH, '开始监听文件改动。')
-                if (!fs.existsSync(config.dest)) {
-                    buildFiles()
-                }
-            }
-        })
+
+    // watcher.on('ready', () => {
+    //     if (!this.isWatched) {
+    //         this.isWatched = true
+    //         log.msg(LogType.WATCH, '开始监听文件改动。')
+    //         if (!fs.existsSync(config.dest)) {
+    //             buildFiles()
+    //         }
+    //     }
+    // })
 
     return watcher
 }
@@ -229,7 +234,6 @@ function run() {
     if (fs.existsSync(config.src)) {
         getUserConfig()
         buildFiles()
-        watchFile()
     } else {
         log.msg(LogType.WARN, '该目录下暂无初始化项目，请使用foxtail init初始化项目。')
     }

@@ -8,7 +8,6 @@ const path = require('path')
 const less = require('less')
 // const fs = require('fs')
 const fs = require('fs-extra')
-
 let configData = {}
 
 const isWin32 = process.platform === 'win32'
@@ -178,12 +177,14 @@ function watchAddDir(dir) {
     if (!fs.existsSync(dest)) {
         log.msg(LogType.CREATE, dir)
         fs.mkdirSync(dest)
-        if (dest.indexOf('pages') > -1) {
-            fs.writeFile(path.join(src, 'index.js'), 'Page({})')
-            fs.writeFile(path.join(src, 'index.json'), '{}')
-            fs.createFile(path.join(src, 'index.less'))
-            fs.createFile(path.join(src, 'index.wxml'))
-        }
+        setTimeout(() => {
+            if (!fs.readdirSync(dest).length) {
+                fs.writeFile(path.join(src, 'index.js'), 'Page({})')
+                fs.writeFile(path.join(src, 'index.json'), '{}')
+                fs.createFile(path.join(src, 'index.less'))
+                fs.createFile(path.join(src, 'index.wxml'))
+            }
+        }, 100)
     }
 }
 

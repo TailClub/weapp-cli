@@ -16,5 +16,9 @@
             "scope": "@comps",
             "dir": "comps"
         }
+    },
+    "useAsync": {
+        "active": true,
+        "path": "@lib/runtime"
     }
 }

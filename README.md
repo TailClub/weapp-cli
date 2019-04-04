@@ -13,3 +13,8 @@ dest 目录为小程序实际运行目录
 ## foxmin dev
 
 开发模式，监听 src 目录文件改动，自动替换 alias 路径。
+
+## change log
+### v1.7.0 
+支持less alias路径
+

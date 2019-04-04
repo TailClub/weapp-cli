@@ -14,7 +14,15 @@ const isWin32 = process.platform === 'win32'
 
 // 编译less
 function compileLess(srcPath, destPath) {
-    const content = fs.readFileSync(srcPath, 'utf8')
+    let content = fs.readFileSync(srcPath, 'utf8')
+
+    configData.alias.forEach(v => {
+        const relative = path.relative(path.dirname(srcPath), v.dir)
+        const relativePath = isWin32 ? relative.replace(/\\/g, '/') : relative
+        const regexp = new RegExp(`${v.scope}`, 'g')
+        content = content.replace(regexp, relativePath)
+    })
+    
     less.render(content, {
         rootFileInfo: {
             currentDirectory: path.dirname(srcPath)
